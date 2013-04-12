@@ -1,0 +1,7 @@
+
+#!/usr/bin/env perl
+
+package migrate;
+use Modware::Migrate;
+
+Modware::Migrate->run;
