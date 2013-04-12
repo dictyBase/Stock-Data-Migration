@@ -1,0 +1,11 @@
+legacy_dsn:
+legacy_user:
+legacy_password:
+
+dsn:
+user:
+password:
+
+pg_dsn:
+pg_user:
+pg_password:
