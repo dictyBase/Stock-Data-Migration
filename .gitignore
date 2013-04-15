@@ -2,6 +2,7 @@
 local/
 tmp/
 
-# Config file
+# Config files
+config/
 *.yaml
 !*.yaml.sample
