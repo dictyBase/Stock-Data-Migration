@@ -21,4 +21,4 @@ phenotype
 
 ### Data Models
 
-1. [stock inventory](https://github.com/dictyBase/Stock-Data-Migration/blob/develop/data/models/stock_inventory.md)
+1. [stock inventory](data/models/stock_inventory.md)
