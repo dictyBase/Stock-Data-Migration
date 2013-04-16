@@ -18,6 +18,10 @@ has '_organism_row' => (
     }
 );
 
+=item find_or_create_organism_id (Str $genus_species)
+
+=cut
+
 method find_or_create_organism_id (Str $genus_species) {
     my @organism = split( / /, $genus_species );
     if ( $self->has_organism_row( $organism[1] ) ) {
@@ -33,8 +37,7 @@ method find_or_create_organism_id (Str $genus_species) {
     }
     else {
         my $new_organism_row
-            = $self->pg_schema->resultset('Organism::Organism')
-            ->create(
+            = $self->pg_schema->resultset('Organism::Organism')->create(
             {   genus        => $organism[0],
                 species      => $organism[1],
                 common_name  => $organism[1],
@@ -50,3 +53,13 @@ method find_or_create_organism_id (Str $genus_species) {
 1;
 
 __END__
+
+=head1 NAME
+
+Modware::Role::DataStash::Organism - Role for hash look-up of C<Organism::Organism>
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+=cut

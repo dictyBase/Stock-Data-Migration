@@ -20,6 +20,10 @@ has '_dbxref_row' => (
     }
 );
 
+=item find_dbxref_accession (Int $dbxref_id)
+	
+=cut
+
 method find_dbxref_accession (Int $dbxref_id) {
     if ( $self->has_dbxref_row($dbxref_id) ) {
         return $self->get_dbxref_row($dbxref_id)->accession;
@@ -45,6 +49,10 @@ has '_dbxref_id_row' => (
         has_dbxref_id_row => 'defined'
     }
 );
+
+=item find_or_create_dbxref_id (Str $accession)
+
+=cut
 
 method find_or_create_dbxref_id (Str $accession) {
     if ( $self->has_dbxref_id_row($accession) ) {
@@ -73,3 +81,13 @@ method find_or_create_dbxref_id (Str $accession) {
 1;
 
 __END__
+
+=head1 NAME
+
+Modware::Role::DataStash::Dbxref - Role for hash look-up of C<General::Dbxref> data
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+=cut
