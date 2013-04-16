@@ -51,43 +51,51 @@ method find_strain_inventory(Str $dbs_id) {
     }
 }
 
+has '_stockcollection_row' => (
+    is      => 'rw',
+    isa     => 'HashRef',
+    traits  => [qw/Hash/],
+    default => sub { {} },
+    handles => {
+        set_stockcollection_row => 'set',
+        get_stockcollection_row => 'get',
+        has_stockcollection_row => 'defined'
+    }
+);
+
 =item create_stockcollection (Str $dbs_id)
 
 =cut
 
-method create_stockcollection (Str $dbs_id) {
-    my $uniquename;
+method find_or_create_stockcollection (Str $dbs_id) {
+    if ( $self->has_stockcollection_row($dbs_id) ) {
+        return $self->get_stockcollection_row($dbs_id);
+    }
     my $stockcollection_rs
         = $self->pg_schema->resultset('Stock::Stockcollection')
-        ->search( { uniquename => { like => $dbs_id . "%" } },
-        { select => 'uniquename' } );
-    if ( $stockcollection_rs->count == 0 ) {
-        $uniquename = $dbs_id;
+        ->search( { uniquename => $dbs_id },
+        { select => [qw/uniquename stockcollection_id/] } );
+    if ( $stockcollection_rs->count > 0 ) {
+        $self->set_stockcollection_row( $dbs_id, $stockcollection_rs->first );
+        return $self->get_stockcollection_row($dbs_id);
     }
-    elsif ( $stockcollection_rs->count == 1 ) {
-        $uniquename = $dbs_id . "|1";
+    else {
+        my $new_stockcollection_rs
+            = $self->pg_schema->resultset('Stock::Stockcollection')->create(
+            {   type_id =>
+                    $self->find_or_create_cvterm_id('strain_inventory'),
+                name       => 'dictyBase stock center',
+                uniquename => $dbs_id
+            }
+            );
+        $self->set_stockcollection_row( $dbs_id, $new_stockcollection_rs );
+        return $self->get_stockcollection_row($dbs_id);
     }
-    elsif ( $stockcollection_rs->count >= 2 ) {
-        my @ranks;
-        while ( my $stockC = $stockcollection_rs->next ) {
-            my @count = split( /\|/, $stockC->uniquename )
-                if $stockC->uniquename =~ /\|/;
-            push( @ranks, $count[1] ) if $count[1];
-        }
-        my @sorted_ranks = sort { $a <=> $b } @ranks;
-        my $new_rank = $sorted_ranks[ scalar(@sorted_ranks) - 1 ] + 1;
-        $uniquename = $dbs_id . "|" . $new_rank;
-    }
-    my $new_stockcollection_rs
-        = $self->pg_schema->resultset('Stock::Stockcollection')->create(
-        {   type_id    => $self->find_or_create_cvterm_id('strain_inventory'),
-            name       => 'dictyBase stock center',
-            uniquename => $uniquename
-        }
-        );
-    return $new_stockcollection_rs;
-
 }
+
+=item is_strain_invent_loaded 
+
+=cut
 
 method is_strain_invent_loaded () {
     my $cv_rs = $self->pg_schema->resultset('Cv::Cv')
