@@ -3,6 +3,7 @@ use strict;
 
 package Modware::Strain::Migrator;
 
+use JSON;
 use Moose;
 use namespace::autoclean;
 
@@ -15,6 +16,10 @@ has 'data_stash' => (
     default => sub { return Modware::Role::DataStash->new },
     lazy    => 1
 );
+
+=item migrate_strain()
+
+=cut
 
 sub migrate_strain {
 
@@ -55,6 +60,10 @@ sub migrate_strain {
     }
 }
 
+=item migrate_strain_inventory()
+
+=cut
+
 sub migrate_strain_inventory {
     my ($self) = @_;
     if ( $self->data_stash->is_strain_invent_loaded ) {
@@ -71,99 +80,45 @@ sub migrate_strain_inventory {
                 = $self->data_stash->find_strain_inventory(
                 $strain->uniquename );
 
+            my $stockcollection_new
+                = $self->data_stash->find_or_create_stockcollection(
+                'dicty stock center');
+
             if ($strain_invent_rs) {
                 if ( $strain_invent_rs->count > 0 ) {
+                    my $rank = 0;
                     while ( my $strain_invent = $strain_invent_rs->next ) {
 
-                        my $stockcollection_new
-                            = $self->data_stash->create_stockcollection(
-                            $strain->uniquename );
+                        my $inventory = {
+                            'location' => $strain_invent->location,
+                            'color'    => $strain_invent
+                                ->color,    # if $strain_invent->color ne '\''
+                            'number of vials' => $strain_invent->no_of_vials,
+                            'storage date'    => $strain_invent->storage_date,
+                            'obtained as'     => $strain_invent->obtained_as
+                            ,    # $strain_invent->obtained_as !~ /\?/
+                            'stored as' => $strain_invent->stored_as,
+                        };
 
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
+                        my $json_text = JSON->new->pretty->encode($inventory);
+
+                        $strain->create_related(
+                            'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
-                                    'location'),
-                                value => $strain_invent->location,
-                                rank  => 0
-                            }
-                        ) if $strain_invent->location;
-
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
-                            {   type_id => $self->data_stash
-                                    ->find_or_create_cvterm_id(
-                                    'color'),
-                                value => $strain_invent->color,
-                                rank  => 1
-                            }
-                        ) if $strain_invent->color ne '\'';
-
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
-                            {   type_id => $self->data_stash
-                                    ->find_or_create_cvterm_id(
-                                    'storage date'),
-                                value => $strain_invent->storage_date,
-                                rank  => 2
+                                    'strain_inventory'),
+                                value => $json_text,
+                                rank  => $rank
                             }
                         );
 
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
-                            {   type_id => $self->data_stash
-                                    ->find_or_create_cvterm_id(
-                                    'number of vials'),
-                                value => $strain_invent->no_of_vials,
-                                rank  => 3
-                            }
-                        ) if $strain_invent->no_of_vials;
+                        $rank += 1;
 
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
-                            {   type_id => $self->data_stash
-                                    ->find_or_create_cvterm_id(
-                                    'obtained as'),
-                                value => $strain_invent->obtained_as,
-                                rank  => 4
-                            }
-                            )
-                            if $strain_invent->obtained_as
-                            and $strain_invent->obtained_as !~ /\?/;
-
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
-                            {   type_id => $self->data_stash
-                                    ->find_or_create_cvterm_id(
-                                    'stored as'),
-                                value => $strain_invent->stored_as,
-                                rank  => 5
-                            }
-                        ) if $strain_invent->stored_as;
-
-                        $stockcollection_new->create_related(
-                            'stockcollection_stocks',
-                            { stock_id => $strain->stock_id } );
-
-#                        print $strain->uniquename . "\t";
-#                        print $strain_invent->no_of_vials . "\t"
-#                            if $strain_invent->no_of_vials
-#                            and $strain_invent->no_of_vials !~ /na/;
-#                        print $strain_invent->location . "\t"
-#                            if $strain_invent->location;
-#                        print $strain_invent->color . "\t"
-#                            if $strain_invent->color ne '\'';
-#                        print $strain_invent->storage_date . "\t"
-#                            if $strain_invent->storage_date;
-#                        print $strain_invent->obtained_as . "\t"
-#                            if $strain_invent->obtained_as
-#                            and $strain_invent->obtained_as !~ /\?/;
-#                        print $strain_invent->stored_as . "\t"
-#                            if $strain_invent->stored_as
-#                            and $strain_invent->stored_as ne "?";
-#
-#                        print "\n";
                     }
+
+                    $stockcollection_new->create_related(
+                        'stockcollection_stocks',
+                        { stock_id => $strain->stock_id } );
                 }
             }
         }
@@ -174,3 +129,13 @@ sub migrate_strain_inventory {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+=cut
