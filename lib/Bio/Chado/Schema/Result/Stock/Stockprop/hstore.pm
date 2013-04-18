@@ -83,7 +83,7 @@ __PACKAGE__->add_columns(
     { data_type => "integer", default_value => 0, is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("stockprop_id");
-__PACKAGE__->add_unique_constraint( "stockprop_c1",
+__PACKAGE__->add_unique_constraint( "stockprop_hstore_c1",
     [ "stock_id", "type_id", "rank" ] );
 
 =head1 RELATIONS
@@ -141,6 +141,20 @@ __PACKAGE__->has_many(
     "Bio::Chado::Schema::Result::Stock::StockpropPub",
     { "foreign.stockprop_id" => "self.stockprop_id" },
     { cascade_copy           => 0, cascade_delete => 0 },
+);
+
+=head2
+
+=cut
+
+Bio::Chado::Schema->plugin_add_relationship(
+    'Stock::Stock',
+    'has_many',
+    (   "stockprop_hstore",
+        "Bio::Chado::Schema::Result::Stock::Stockprop::hstore",
+        { "foreign.stock_id" => "self.stock_id" },
+        { cascade_copy       => 0, cascade_delete => 0 }
+    )
 );
 
 # Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-03-16 23:09:59
