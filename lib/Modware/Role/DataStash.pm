@@ -17,3 +17,13 @@ with 'Modware::Role::Command::WithBCS';
 1;
 
 __END__
+
+=head1 NAME
+
+Modware::Role::DataStash - Class consuming all hash look-up roles
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+=cut

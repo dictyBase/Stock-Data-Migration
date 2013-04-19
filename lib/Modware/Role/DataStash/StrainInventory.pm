@@ -19,6 +19,10 @@ has '_strain_invent_row' => (
     }
 );
 
+=item find_strain_inventory (Str $dbs_id)
+
+=cut
+
 method find_strain_inventory(Str $dbs_id) {
     if ( $self->has_strain_invent($dbs_id) ) {
         return $self->get_strain_invent_row($dbs_id);
@@ -43,9 +47,13 @@ method find_strain_inventory(Str $dbs_id) {
     }
     else {
         print "Cannot find strain inventory for $dbs_id\n";
-		return 0;
+        return 0;
     }
 }
+
+=item create_stockcollection (Str $dbs_id)
+
+=cut
 
 method create_stockcollection (Str $dbs_id) {
     my $uniquename;
@@ -90,4 +98,13 @@ method is_strain_invent_loaded () {
 1;
 
 __END__
-97:	To see 1 non-critical warnings rerun with -w
+
+=head1 NAME
+
+Modware::Role::DataStash::StrainInventory - Role of hash look-up of C<StockCenterInventory>
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+=cut

@@ -62,8 +62,7 @@ sub migrate_strain_inventory {
             {},
             {   select => [qw/stock_id uniquename/],
                 cache  => 1,
-
-                #rows   => 500
+                rows   => 500
             }
         );
         while ( my $strain = $strain_rs->next ) {
@@ -73,96 +72,91 @@ sub migrate_strain_inventory {
 
             if ($strain_invent_rs) {
                 if ( $strain_invent_rs->count > 0 ) {
+                    my $rank = 0;
                     while ( my $strain_invent = $strain_invent_rs->next ) {
 
-                        my $stockcollection_new
-                            = $self->data_stash->create_stockcollection(
-                            $strain->uniquename );
-
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
+                        $strain->create_related(
+                            'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
                                     'location'),
                                 value => $strain_invent->location,
-                                rank  => 0
+                                rank  => $rank
                             }
                         ) if $strain_invent->location;
 
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
+                        $strain->create_related(
+                            'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
                                     'color'),
                                 value => $strain_invent->color,
-                                rank  => 1
+                                rank  => $rank
                             }
                         ) if $strain_invent->color ne '\'';
 
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
+                        $strain->create_related(
+                            'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
                                     'storage date'),
                                 value => $strain_invent->storage_date,
-                                rank  => 2
+                                rank  => $rank
                             }
                         );
 
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
+                        $strain->create_related(
+                            'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
                                     'number of vials'),
                                 value => $strain_invent->no_of_vials,
-                                rank  => 3
+                                rank  => $rank
                             }
                         ) if $strain_invent->no_of_vials;
 
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
+                        $strain->create_related(
+                            'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
                                     'obtained as'),
                                 value => $strain_invent->obtained_as,
-                                rank  => 4
+                                rank  => $rank
                             }
                             )
                             if $strain_invent->obtained_as
                             and $strain_invent->obtained_as !~ /\?/;
 
-                        $stockcollection_new->create_related(
-                            'stockcollectionprops',
+                        $strain->create_related(
+                            'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
                                     'stored as'),
                                 value => $strain_invent->stored_as,
-                                rank  => 5
+                                rank  => $rank
                             }
                         ) if $strain_invent->stored_as;
 
-                        $stockcollection_new->create_related(
-                            'stockcollection_stocks',
-                            { stock_id => $strain->stock_id } );
+                        $rank += 1;
 
-#                        print $strain->uniquename . "\t";
-#                        print $strain_invent->no_of_vials . "\t"
-#                            if $strain_invent->no_of_vials
-#                            and $strain_invent->no_of_vials !~ /na/;
-#                        print $strain_invent->location . "\t"
-#                            if $strain_invent->location;
-#                        print $strain_invent->color . "\t"
-#                            if $strain_invent->color ne '\'';
-#                        print $strain_invent->storage_date . "\t"
-#                            if $strain_invent->storage_date;
-#                        print $strain_invent->obtained_as . "\t"
-#                            if $strain_invent->obtained_as
-#                            and $strain_invent->obtained_as !~ /\?/;
-#                        print $strain_invent->stored_as . "\t"
-#                            if $strain_invent->stored_as
-#                            and $strain_invent->stored_as ne "?";
-#
-#                        print "\n";
+         #                        print $strain->uniquename . "\t";
+         #                        print $strain_invent->no_of_vials . "\t"
+         #                            if $strain_invent->no_of_vials
+         #                            and $strain_invent->no_of_vials !~ /na/;
+         #                        print $strain_invent->location . "\t"
+         #                            if $strain_invent->location;
+         #                        print $strain_invent->color . "\t"
+         #                            if $strain_invent->color ne '\'';
+         #                        print $strain_invent->storage_date . "\t"
+         #                            if $strain_invent->storage_date;
+         #                        print $strain_invent->obtained_as . "\t"
+         #                            if $strain_invent->obtained_as
+         #                            and $strain_invent->obtained_as !~ /\?/;
+         #                        print $strain_invent->stored_as . "\t"
+         #                            if $strain_invent->stored_as
+         #                            and $strain_invent->stored_as ne "?";
+         #
+         #                        print "\n";
                     }
                 }
             }

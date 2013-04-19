@@ -19,6 +19,10 @@ has '_cvterm_row' => (
     }
 );
 
+=item find_or_create_cvterm_id (Str $name)
+
+=cut
+
 method find_or_create_cvterm_id (Str $name) {
     $self->_find_or_create_cvterm_for_stock($name)
         if ( $name =~ m/strain|plasmid/ );
@@ -32,6 +36,10 @@ method find_or_create_cvterm_id (Str $name) {
         return $self->get_cvterm_row($name)->cvterm_id;
     }
 }
+
+=item _find_or_create_cvterm_for_stock (Str $name)
+
+=cut
 
 method _find_or_create_cvterm_for_stock (Str $name) {
     if ( $self->has_cvterm_row($name) ) {
@@ -59,4 +67,13 @@ method _find_or_create_cvterm_for_stock (Str $name) {
 
 __END__
 
+=head1 NAME
+
+Modware::Role::DataStash::Cvterm - Role for hash look-up of C<Cv::Cvterm>
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+=cut
 

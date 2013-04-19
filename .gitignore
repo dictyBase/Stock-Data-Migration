@@ -6,3 +6,7 @@ tmp/
 config/
 *.yaml
 !*.yaml.sample
+
+# EER diagram file
+*.mwb
+*.mwb.bak
