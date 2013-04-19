@@ -7,7 +7,18 @@ Migration of stock (strain & plasmid) data from legacy schema to standard [Chado
 _TODO_
 
 ### Data components
-_TODO_
+
+```text
+stock
+	|- strain
+		|- strain, inventory, genotype, phenotype, cvterm, pub, orders
+
+	|- plasmid
+		|- plasmid, inventory, genotype, phenotype
+
+phenotype
+```
 
 ### Data Models
-_TODO_
+
+1. [stock inventory](data/models/stock_inventory.md)

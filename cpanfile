@@ -8,3 +8,7 @@ requires 'Math::Base36';
 
 requires 'DBD::Pg';
 requires 'DBD::Oracle';
+
+on 'test' => sub {
+	requires 'Test::Spec', '0.46';
+};

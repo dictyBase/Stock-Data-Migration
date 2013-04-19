@@ -19,6 +19,10 @@ has '_cv_row' => (
     }
 );
 
+=item find_or_create_cv_id (Str $name)
+	
+=cut
+
 method find_or_create_cv_id (Str $name) {
     if ( $self->has_cv_row($name) ) {
         return $self->get_cv_row($name)->cv_id;
@@ -41,3 +45,13 @@ method find_or_create_cv_id (Str $name) {
 1;
 
 __END__
+
+=head1 NAME
+
+Modware::Role::DataStash::Cv - Role for hash look-up of C<Cv::Cv>
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+=cut

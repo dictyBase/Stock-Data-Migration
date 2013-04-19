@@ -7,8 +7,7 @@ use MooseX::Method::Signatures;
 use Moose::Role;
 use namespace::autoclean;
 
-
-has 'db_row' => (
+has '_db_row' => (
     is      => 'rw',
     isa     => 'HashRef',
     traits  => [qw/Hash/],
@@ -19,6 +18,10 @@ has 'db_row' => (
         has_db_row => 'defined'
     }
 );
+
+=item find_or_create_db_id (Str $name)
+	
+=cut
 
 method find_or_create_db_id (Str $name) {
     if ( $self->has_db_row($name) ) {
@@ -43,3 +46,13 @@ method find_or_create_db_id (Str $name) {
 1;
 
 __END__
+
+=head1 NAME
+
+Modware::Role::DataStash::Db - Role for hash look-up of C<General::Db>
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+=cut
