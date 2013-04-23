@@ -17,8 +17,10 @@ sub execute {
     my $migrator = Modware::Strain::Migrator->new;
 
     my $guard = $self->pg_schema->storage->txn_scope_guard;
+
     #$migrator->migrate_strain();
-	$migrator->migrate_strain_inventory();
+    #$migrator->migrate_strain_inventory();
+    $migrator->migrate_strain_pub();
     $guard->commit;
 
 }

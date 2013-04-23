@@ -3,6 +3,7 @@ use strict;
 
 package Modware::Strain::Migrator;
 
+use MooseX::Method::Signatures;
 use Moose;
 use namespace::autoclean;
 
@@ -139,24 +140,6 @@ sub migrate_strain_inventory {
 
                         $rank += 1;
 
-         #                        print $strain->uniquename . "\t";
-         #                        print $strain_invent->no_of_vials . "\t"
-         #                            if $strain_invent->no_of_vials
-         #                            and $strain_invent->no_of_vials !~ /na/;
-         #                        print $strain_invent->location . "\t"
-         #                            if $strain_invent->location;
-         #                        print $strain_invent->color . "\t"
-         #                            if $strain_invent->color ne '\'';
-         #                        print $strain_invent->storage_date . "\t"
-         #                            if $strain_invent->storage_date;
-         #                        print $strain_invent->obtained_as . "\t"
-         #                            if $strain_invent->obtained_as
-         #                            and $strain_invent->obtained_as !~ /\?/;
-         #                        print $strain_invent->stored_as . "\t"
-         #                            if $strain_invent->stored_as
-         #                            and $strain_invent->stored_as ne "?";
-         #
-         #                        print "\n";
                     }
                 }
             }
@@ -165,6 +148,51 @@ sub migrate_strain_inventory {
     else {
         print "Please load the strain_inventory ontology first !\n";
     }
+}
+
+sub migrate_strain_pub {
+    my ($self) = @_;
+    my $strain_rs = $self->pg_schema->resultset('Stock::Stock')->search(
+        {},
+        {   select => [qw/stock_id uniquename/],
+            cache  => 1,
+            rows   => 500
+        }
+    );
+    while ( my $strain = $strain_rs->next ) {
+        my $pmid = $self->data_stash->find_pubmed_id( $strain->uniquename );
+        if ($pmid) {
+            my @pmids = split( /,/, $pmid ) if $pmid =~ /,/;
+            if (@pmids) {
+
+                #print scalar(@pmids) . "\n";
+                foreach my $pmid_ (@pmids) {
+                    $pmid_ = $self->trim($pmid_);
+                    my $pub_id
+                        = $self->data_stash->find_or_import_pub_id($pmid_);
+                    $strain->create_related( 'stock_pubs',
+                        { pub_id => $pub_id } )
+                        if $pub_id;
+                    print $strain->uniquename . "\t"
+                        . $pmid_ . "\t"
+                        . $pub_id . "\n";
+                }
+            }
+            else {
+                my $pub_id = $self->data_stash->find_or_import_pub_id($pmid);
+                $strain->create_related( 'stock_pubs', { pub_id => $pub_id } )
+                    if $pub_id;
+                print $strain->uniquename . "\t" . $pmid . "\t" . $pub_id
+                    . "\n";
+            }
+        }
+    }
+}
+
+method trim(Str $s) {
+    $s =~ s/^\s+//;
+    $s =~ s/\s+$//;
+    return $s;
 }
 
 1;
