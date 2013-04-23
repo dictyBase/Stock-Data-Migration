@@ -23,7 +23,7 @@ has '_cvterm_row' => (
 
 =cut
 
-method find_or_create_cvterm_id (Str $name) {
+method find_or_create_cvterm_id (Str $name, Str $cv_name, Str $db_name) {                                                                    
     $self->_find_or_create_cvterm_for_stock($name)
         if ( $name =~ m/strain|plasmid/ );
     if ( $self->has_cvterm_row($name) ) {
@@ -34,6 +34,17 @@ method find_or_create_cvterm_id (Str $name) {
     if ( $cvterm_row->count > 0 ) {
         $self->set_cvterm_row( $name, $cvterm_row->first );
         return $self->get_cvterm_row($name)->cvterm_id;
+    }
+    else {
+        my $new_cvterm = $self->pg_schema->resultset('Cv::Cvterm')->create(
+            {   name  => $name,
+                cv_id => $self->find_or_create_cv_id($cv_name),
+                dbxref_id =>
+                    $self->find_or_create_dbxref_id( $name, $db_name )
+            }
+        );
+		$self->set_cvterm_row($name, $new_cvterm);
+		return $self->get_cvterm_row($name)->cvterm_id;
     }
 }
 
@@ -53,9 +64,10 @@ method _find_or_create_cvterm_for_stock (Str $name) {
     }
     else {
         my $new_cvterm = $self->pg_schema->resultset('Cv::Cvterm')->create(
-            {   name      => $name,
-                cv_id     => $self->find_or_create_cv_id('dicty_stocks'),
-                dbxref_id => $self->find_or_create_dbxref_id($name)
+            {   name  => $name,
+                cv_id => $self->find_or_create_cv_id('dicty_stocks'),
+                dbxref_id =>
+                    $self->find_or_create_dbxref_id( $name, 'dictyBase' )
             }
         );
         $self->set_cvterm_row( $name, $new_cvterm );

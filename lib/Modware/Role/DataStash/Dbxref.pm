@@ -54,7 +54,7 @@ has '_dbxref_id_row' => (
 
 =cut
 
-method find_or_create_dbxref_id (Str $accession) {
+method find_or_create_dbxref_id (Str $accession, Str $db_name) {
     if ( $self->has_dbxref_id_row($accession) ) {
         return $self->get_dbxref_id_row($accession)->dbxref_id;
     }
@@ -70,7 +70,7 @@ method find_or_create_dbxref_id (Str $accession) {
         my $new_dbxref_id
             = $self->pg_schema->resultset('General::Dbxref')->create(
             {   accession => $accession,
-                db_id     => $self->find_or_create_db_id('dictyBase')
+                db_id     => $self->find_or_create_db_id($db_name)
             }
             );
         $self->set_dbxref_id_row( $accession, $new_dbxref_id );
