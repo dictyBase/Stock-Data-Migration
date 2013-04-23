@@ -30,3 +30,12 @@ FROM stock s
 JOIN stockprop stp ON stp.stock_id = s.stock_id
 WHERE stp.value->color = 'yellow'
 ;
+
+/* Get PubMed IDs associated with strains */
+SELECT s.uniquename, pub.uniquename, pub.pubplace
+FROM stock s
+JOIN stock_pub sp ON sp.stock_id = s.stock_id
+JOIN pub ON pub.pub_id = sp.pub_id
+JOIN cvterm ON cvterm.cvterm_id = s.type_id
+WHERE cvterm.name = 'strain'
+;
