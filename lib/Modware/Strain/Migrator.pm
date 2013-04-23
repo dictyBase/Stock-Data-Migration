@@ -60,10 +60,11 @@ sub migrate_strain_inventory {
     my ($self) = @_;
     if ( $self->data_stash->is_strain_invent_loaded ) {
         my $strain_rs = $self->pg_schema->resultset('Stock::Stock')->search(
-            {},
-            {   select => [qw/stock_id uniquename/],
+            { 'type.name' => 'strain' },
+            {   join   => 'type',
+                select => [qw/stock_id uniquename/],
                 cache  => 1,
-                rows   => 500
+				#rows   => 500
             }
         );
         while ( my $strain = $strain_rs->next ) {
@@ -80,7 +81,9 @@ sub migrate_strain_inventory {
                             'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
-                                    'location'),
+                                    'location', 'dicty_stocks',
+                                    'dictyBase'
+                                    ),
                                 value => $strain_invent->location,
                                 rank  => $rank
                             }
@@ -90,7 +93,8 @@ sub migrate_strain_inventory {
                             'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
-                                    'color'),
+                                    'color', 'dicty_stocks', 'dictyBase'
+                                    ),
                                 value => $strain_invent->color,
                                 rank  => $rank
                             }
@@ -100,7 +104,9 @@ sub migrate_strain_inventory {
                             'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
-                                    'storage date'),
+                                    'storage date', 'dicty_stocks',
+                                    'dictyBase'
+                                    ),
                                 value => $strain_invent->storage_date,
                                 rank  => $rank
                             }
@@ -110,7 +116,9 @@ sub migrate_strain_inventory {
                             'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
-                                    'number of vials'),
+                                    'number of vials', 'dicty_stocks',
+                                    'dictyBase'
+                                    ),
                                 value => $strain_invent->no_of_vials,
                                 rank  => $rank
                             }
@@ -120,7 +128,9 @@ sub migrate_strain_inventory {
                             'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
-                                    'obtained as'),
+                                    'obtained as', 'dicty_stocks',
+                                    'dictyBase'
+                                    ),
                                 value => $strain_invent->obtained_as,
                                 rank  => $rank
                             }
@@ -132,7 +142,9 @@ sub migrate_strain_inventory {
                             'stockprops',
                             {   type_id => $self->data_stash
                                     ->find_or_create_cvterm_id(
-                                    'stored as'),
+                                    'stored as', 'dicty_stocks',
+                                    'dictyBase'
+                                    ),
                                 value => $strain_invent->stored_as,
                                 rank  => $rank
                             }
@@ -153,10 +165,12 @@ sub migrate_strain_inventory {
 sub migrate_strain_pub {
     my ($self) = @_;
     my $strain_rs = $self->pg_schema->resultset('Stock::Stock')->search(
-        {},
-        {   select => [qw/stock_id uniquename/],
+        { 'type.name' => 'strain' },
+        {   join   => 'type',
+            select => [qw/me.stock_id me.uniquename/],
             cache  => 1,
-            rows   => 500
+
+            #rows   => 500
         }
     );
     while ( my $strain = $strain_rs->next ) {
@@ -164,26 +178,32 @@ sub migrate_strain_pub {
         if ($pmid) {
             my @pmids = split( /,/, $pmid ) if $pmid =~ /,/;
             if (@pmids) {
-
-                #print scalar(@pmids) . "\n";
                 foreach my $pmid_ (@pmids) {
                     $pmid_ = $self->trim($pmid_);
-                    my $pub_id
-                        = $self->data_stash->find_or_import_pub_id($pmid_);
-                    $strain->create_related( 'stock_pubs',
-                        { pub_id => $pub_id } )
-                        if $pub_id;
-                    print $strain->uniquename . "\t"
-                        . $pmid_ . "\t"
-                        . $pub_id . "\n";
+                    if ( $pmid_ and $pmid_ =~ /[0-9]{1,9}/ ) {
+                        my $pub_id
+                            = $self->data_stash->find_or_import_pub_id(
+                            $pmid_);
+                        $strain->create_related( 'stock_pubs',
+                            { pub_id => $pub_id } )
+                            if $pub_id;
+                        print $strain->uniquename . "\t"
+                            . $pmid_ . "\t"
+                            . $pub_id . "\n";
+                    }
                 }
             }
             else {
-                my $pub_id = $self->data_stash->find_or_import_pub_id($pmid);
-                $strain->create_related( 'stock_pubs', { pub_id => $pub_id } )
-                    if $pub_id;
-                print $strain->uniquename . "\t" . $pmid . "\t" . $pub_id
-                    . "\n";
+                $pmid = $self->trim($pmid);
+                if ( $pmid =~ /[0-9]{1,9}/ ) {
+                    my $pub_id
+                        = $self->data_stash->find_or_import_pub_id($pmid);
+                    $strain->create_related( 'stock_pubs',
+                        { pub_id => $pub_id } )
+                        if $pub_id;
+                    print $strain->uniquename . "\t" . $pmid . "\t" . $pub_id
+                        . "\n";
+                }
             }
         }
     }
@@ -192,6 +212,7 @@ sub migrate_strain_pub {
 method trim(Str $s) {
     $s =~ s/^\s+//;
     $s =~ s/\s+$//;
+    $s =~ s/[[:punct:]]//g;
     return $s;
 }
 

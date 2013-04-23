@@ -52,7 +52,7 @@ method find_or_create_cvterm_id (Str $name, Str $cv_name, Str $db_name) {
 
 =cut
 
-method _find_or_create_cvterm_for_stock (Str $name) {
+method _find_or_create_cvterm_for_stock (Str $name, Str $cv_name, Str $db_name) {
     if ( $self->has_cvterm_row($name) ) {
         return $self->get_cvterm_row($name)->cvterm_id;
     }
@@ -65,9 +65,9 @@ method _find_or_create_cvterm_for_stock (Str $name) {
     else {
         my $new_cvterm = $self->pg_schema->resultset('Cv::Cvterm')->create(
             {   name  => $name,
-                cv_id => $self->find_or_create_cv_id('dicty_stocks'),
+                cv_id => $self->find_or_create_cv_id($cv_name),
                 dbxref_id =>
-                    $self->find_or_create_dbxref_id( $name, 'dictyBase' )
+                    $self->find_or_create_dbxref_id( $name, $db_name )
             }
         );
         $self->set_cvterm_row( $name, $new_cvterm );
