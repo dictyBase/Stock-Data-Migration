@@ -10,6 +10,7 @@ with 'Modware::Role::DataStash::Cvterm';
 with 'Modware::Role::DataStash::Db';
 with 'Modware::Role::DataStash::Dbxref';
 with 'Modware::Role::DataStash::Organism';
+with 'Modware::Role::DataStash::Pub';
 with 'Modware::Role::DataStash::StrainInventory';
 
 with 'Modware::Role::Command::WithBCS';
