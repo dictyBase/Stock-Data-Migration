@@ -1,7 +1,7 @@
 # Stock Data Migration
 Migration of stock (strain & plasmid) data from legacy schema to standard [Chado](http://gmod.org/wiki/Chado_Tables)
 
-[![Build Status](https://secure.travis-ci.org/dictyBase/Stock-Data-Migration.png?branch=develop)](https://travis-ci.org/dictyBase/Stock-Data-Migration)
+[![Build Status](https://secure.travis-ci.org/dictyBase/Stock-Data-Migration.png?branch=develop)](https://travis-ci.org/dictyBase/Stock-Data-Migration) [![Coverage Status](https://coveralls.io/repos/dictyBase/Stock-Data-Migration/badge.png?branch=develop)](https://coveralls.io/r/dictyBase/Stock-Data-Migration)
 
 ### Background
 _TODO_

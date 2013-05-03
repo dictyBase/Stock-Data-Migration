@@ -1,18 +1,27 @@
 language: perl
 perl:
     - "5.16"
-    - "5.14"
+    - "5.10"
+
+branches:
+    only:
+        - develop
 
 before_install:
+    - "sudo apt-get update"
     - "sudo apt-get install libdb-dev"
     - "cpanm DB_File DBI Data::Stag"
     - "sudo apt-get install libxml2-dev"
     - "cpanm Carton"
 
-install:
-    carton install
+install: carton install
 
 script: "prove -Ilib t/*/*.t -v"
 
 notifications:
     email: false
+
+env: PERL_CPANM_OPT="--notest"
+
+after_success:
+    cover -report coveralls
